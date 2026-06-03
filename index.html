@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ear Caddy Alpha</title>
+    
+    <!-- ==========================================
+         SECTION 1: GLOBAL APP STYLING (CSS)
+         ========================================== -->
+    <style>
+        :root {
+            --forest-green: #1B4D3E;
+            --mint-accent: #E8F5E9;
+            --bg-light: #F9F9FA;
+            --text-dark: #2C3E50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Simulated iPhone Chassis */
+        .phone-container {
+            width: 100%;
+            max-width: 393px;
+            height: 852px;
+            background-color: var(--bg-light);
+            border: 8px solid #222;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Top Notch Layout */
+        .notch {
+            width: 110px;
+            height: 30px;
+            background: #222;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 1000;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: var(--forest-green);
+            font-weight: 700;
+            padding: 40px 20px 5px 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #7f8c8d;
+            padding: 0 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 80px 20px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Card Elements */
+        .dashboard-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #EAEAEA;
+        }
+
+        .text-center { text-align: center; }
+
+        .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #95a5a6;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .distance-display {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--forest-green);
+            margin: 10px 0;
+        }
+
+        .club-suggestion {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 15px 0;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-light);
+            padding: 12px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .btn {
+            background: var(--forest-green);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(27,77,62,0.2);
+        }
+
+        /* Scorecard Entry Panel */
+        .scorecard-active {
+            border: 2px solid var(--forest-green) !important;
+            background: var(--mint-accent) !important;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .score-box {
+            background: var(--bg-light);
+            border: 1px solid #DDD;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .score-box.selected {
+            background: var(--forest-green);
+            color: white;
+            border-color: var(--forest-green);
+        }
+
+        /* 18-Hole Data Tables */
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .score-table th, .score-table td {
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid #EEE;
+        }
+
+        .score-table th {
+            background: #F1F1F1;
+            color: #666;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        /* Virtual Bag Styling */
+        .club-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #EAEAEA;
+        }
+
+        .club-info h3 { font-size: 16px; color: var(--text-dark); }
+        .club-info p { font-size: 12px; color: #999; }
+        .club-distance {
+            background: var(--forest-green);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Tactile Press States */
+        .btn:active {
+            transform: scale(0.97);
+            background-color: #123329 !important;
+            box-shadow: 0 2px 6px rgba(27,77,62,0.15);
+            transition: transform 0.05s ease, background-color 0.05s ease;
+        }
+
+        .score-box:active {
+            transform: scale(0.92);
+            background-color: #DDD;
+            transition: transform 0.05s ease;
+        }
+
+        #geo-trigger-btn:active {
+            background-color: #1A252F !important;
+        }
+        
+        .nav-item:active {
+            transform: scale(0.95);
+            transition: transform 0.05s ease;
+        }
+
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 75px;
+            background: rgba(255,255,255,0.94);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #EAEAEA;
+            display: flex;
+            justify-content: space-around;
+            padding-top: 10px;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #95a5a6;
+            font-size: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active { color: var(--forest-green); font-weight: 600; }
+        .nav-icon { font-size: 22px; margin-bottom: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================
+         PREMIUM EAR CADDY LAUNCH SPLASH SCREEN
+         ========================================== -->
+    <div id="app-splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1B4D3E; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: opacity 0.6s ease, visibility 0.6s;">
+        <!-- Digital Logo Icon -->
+        <div style="width: 90px; height: 90px; background: rgba(255,255,255,0.08); border-radius: 24px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+            <span style="font-size: 42px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🎧</span>
+        </div>
+        <!-- App Title -->
+        <h1 style="color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin: 0;">Ear Caddy</h1>
+        <p style="color: rgba(255,255,255,0.6); font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-top: 8px; margin-bottom: 0;">Tour Companion</p>
+        
+        <!-- Elegant Minimal Spinner -->
+        <div style="position: absolute; bottom: 60px; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #FFFFFF; border-radius: 50%; animation: splashSpinner 0.8s linear infinite;"></div>
+    </div>
+
+    <style>
+        @keyframes splashSpinner {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+
+<div class="phone-container">
+    <div class="notch"></div>
+    <h1>Ear Caddy</h1>
+
+    <div class="content-area">
+        
+        <div id="page-caddy" class="page active">
+        <!-- VOICE COMMAND STATUS DECK -->
+        <div id="voice-status-bar" style="background: rgba(27, 77, 62, 0.05); border: 1px dashed var(--forest-green); padding: 10px 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="voice-status-dot" style="width: 8px; height: 8px; background: #999; border-radius: 50%; display: inline-block;"></span>
+                <span id="voice-status-text" style="font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Voice Control Off</span>
+            </div>
+            <button onclick="toggleVoiceCaddy()" id="voice-toggle-btn" style="background: var(--forest-green); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;">Enable Mic</button>
+        </div>
+
+            <div class="subtitle" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+                <span id="caddy-hole-details" style="font-weight: 500;">Hole 1 • Par 4</span>
+                
+                <select id="course-selector" onchange="changeCourse()" style="background: none; border: none; color: #1B4D3E; font-weight: bold; font-size: 13px; font-family: inherit; cursor: pointer; padding: 0;">
+                    <option value="calderfields">Calderfields GC</option>
+                    <option value="lacala_america">La Cala (America)</option>
+                    <option value="lacala_asia">La Cala (Asia)</option>
+                    <option value="lacala_europa">La Cala (Europa)</option>
+                </select>
+            </div>
+
+            <div style="background: #FFF3CD; border: 1px solid #FFEBAA; padding: 12px; border-radius: 12px; margin: 15px 0; text-align: left;">
+                <span class="label" style="color: #856404; display: block; margin-bottom: 5px;">Dev Radar: Simulation Mode</span>
+                <input type="range" id="sim-distance-slider" min="50" max="300" value="150" style="width: 100%; cursor: pointer;" oninput="simulateMovingWalkway(this.value)">
+                
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #856404; margin-top: 4px; margin-bottom: 10px;">
+                    <span>50 yds</span>
+                    <span id="sim-slider-label" style="font-weight: bold;">Current Position: 150 yds</span>
+                    <span>300 yds</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #FFEBAA; padding-top: 8px;">
+                    <span style="font-size: 12px; font-weight: bold; color: #856404;">Shot Location:</span>
+                    <select id="tee-fairway-toggle" onchange="isTeeShot = (this.value === 'tee'); calculateShot();" style="padding: 4px; border-radius: 4px; font-size: 12px;">
+                        <option value="tee">Tee Box (Shot 1)</option>
+                        <option value="fairway">Fairway/Deck (Shot 2+)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="dashboard-card text-center">
+                <span class="label">Distance to Pin</span>
+                <div class="distance-display" id="display-dist">150 <span style="font-size: 24px;">yds</span></div>
+                
+                <div class="toggle-container">
+                    <span style="font-size: 14px; font-weight: 500;">Simulate 15mph Headwind</span>
+                    <input type="checkbox" id="wind-toggle" style="width: 20px; height: 20px;" onchange="calculateShot()">
+                </div>
+                
+                <hr style="border: 0; border-top: 1px solid #E0E0E0; margin: 20px 0;">
+                
+                <span class="label">Caddy Recommendation</span>
+                <div class="club-suggestion" id="caddy-advice">7 Iron (Smooth Swing)</div>
+                <button class="btn" onclick="speakRecommendation()">Squeeze Stem (Listen)</button>
+            </div>
+
+            <button class="btn" id="geo-trigger-btn" style="background-color: #2C3E50; margin-bottom: 20px;" onclick="simulateLeavingGreen()">Simulate Walking Off Green</button>
+
+            <div id="score-card" class="dashboard-card" style="border: 1px dashed #CCC; background: #FAFBAF;">
+                <div id="score-status" style="font-size:13px; font-weight:bold; color:#999; text-align:center;">🔒 Scorecard Locked</div>
+                <div id="score-content" style="display:none; margin-top:15px;">
+                    <span class="label">Select Score:</span>
+                    <div class="score-grid">
+                        <div class="score-box" onclick="selectScore(this, 1)">1</div>
+                        <div class="score-box" onclick="selectScore(this, 2)">2</div>
+                        <div class="score-box" onclick="selectScore(this, 3)">3</div>
+                        <div class="score-box" onclick="selectScore(this, 4)">4</div>
+                        <div class="score-box" onclick="selectScore(this, 5)">5</div>
+                        <div class="score-box" onclick="selectScore(this, 6)">6</div>
+                        <div class="score-box" onclick="selectScore(this, 7)">7</div>
+                        <div class="score-box" onclick="selectScore(this, 8)">8</div>
+                        <div class="score-box" onclick="selectScore(this, 9)">9</div>
+                        <div class="score-box" onclick="selectScore(this, 10)">10</div>
+                    </div>
+                    <button class="btn" onclick="saveHoleScore()">Save Hole Score</button>
+                </div>
+            </div>
+        </div>
+
+                <div id="page-scores" class="page">
+                        <div class="subtitle" style="display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; margin-bottom: 25px;">
+                <!-- Upgraded dynamic title marker -->
+                <span id="scorecard-course-title" style="font-weight: bold; color: var(--text-dark);">Live Scorecard</span>
+                <span onclick="resetRoundData()" style="color: #FFF; background: #D9534F; font-weight: bold; cursor: pointer; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 4px rgba(217,83,79,0.2);">Wipe Round</span>
+            </div>
+
+            
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>Hole</th>
+                        <th>Par</th>
+                        <th>Score</th>
+                        <th>+/-</th>
+                    </tr>
+                </thead>
+                <tbody id="scorecard-rows"></tbody>
+                <tfoot>
+                    <tr style="background: #F9F9FA; font-weight: bold; border-top: 2px solid #DDD;">
+                        <td>TOT</td>
+                        <td id="total-par-target-cell">73</td>
+                        <td id="total-score-cell">0</td>
+                        <!-- Upgraded dynamic total yards marker -->
+                        <td id="total-to-par-cell" style="color: var(--forest-green);">E</td>
+                    </tr>
+                    <tr style="background: #FFF; font-size: 11px; color: #7f8c8d; font-weight: bold;">
+                        <td colspan="2" style="text-align: left; padding-left: 12px;">TOTAL DISTANCE:</td>
+                        <td colspan="2" id="total-yards-cell" style="text-align: right; padding-right: 12px; color: var(--text-dark);">6,305 yds</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+        </div>
+
+            <!-- ==========================================
+                 ROUND TRACKER ARCHIVE HISTORY PANEL
+                 ========================================== -->
+            <div style="margin-top: 30px; margin-bottom: 20px;">
+                <span class="label" style="display: block; margin-bottom: 10px; font-weight: bold; color: var(--text-dark);">Round History Log</span>
+                <div id="history-log-container" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Saved rounds will dynamically paint inside here -->
+                    <div id="no-rounds-fallback" style="text-align: center; color: #95a5a6; font-size: 13px; padding: 20px; background: white; border-radius: 12px; border: 1px dashed #DDD;">
+                        No historical rounds saved yet.
+                    </div>
+                </div>
+            </div>
+
+        <div id="page-bag" class="page">
+            <div class="subtitle">Virtual Bag Companion</div>
+            
+            <div class="dashboard-card" style="padding: 15px; margin-bottom: 15px; background: #fff; border: 1px solid #EAEAEA; width: 100%; box-sizing: border-box;">
+                <span class="label" style="margin-bottom: 8px; display: block;">Add Custom Club</span>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px; width: 100%; box-sizing: border-box;">
+                    <input type="text" id="new-club-name" placeholder="e.g., 8 Iron" style="flex: 2; width: 60%; min-width: 0; padding: 10px; border-radius: 8px; border: 1px solid #DDD; font-size: 14px; box-sizing: border-box;">
+                    <input type="number" id="new-club-dist" placeholder="Yds" style="flex: 1; width: 35%; min-width: 0; padding: 10px; border-radius: 8px; border: 1px solid #DDD; font-size: 14px; text-align: center; box-sizing: border-box;">
+                </div>
+                <button class="btn" onclick="addNewClub()" style="margin-top: 5px; padding: 10px; font-size: 14px; border-radius: 8px;">+ Add to My Bag</button>
+            </div>
+
+            <div id="bag-list"></div>
+        </div>
+
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active" id="nav-caddy" onclick="switchPage('caddy')">
+            <span class="nav-icon">⛳</span>
+            <span>Caddy Loop</span>
+        </div>
+        <div class="nav-item" id="nav-scores" onclick="switchPage('scores')">
+            <span class="nav-icon">📊</span>
+            <span>Scorecard</span>
+        </div>
+        <div class="nav-item" id="nav-bag" onclick="switchPage('bag')">
+            <span class="nav-icon">💼</span>
+            <span>Virtual Bag</span>
+        </div>
+    </nav>
+</div>
+<script>
+    // ------------------------------------------
+    // SUB-SECTION A: CLUB BAG ARRAYS & MANAGEMENT
+    // ------------------------------------------
+    const defaultBag = [
+        { name: "Driver", brand: "Callaway", model: "Paradym", distance: 240 },
+        { name: "3 Wood", brand: "TaylorMade", model: "Stealth", distance: 220 },
+        { name: "5 Hybrid", brand: "Ping", model: "G430", distance: 180 },
+        { name: "7 Iron", brand: "TaylorMade", model: "Stealth", distance: 150 },
+        { name: "Pitching Wedge", brand: "Titleist", model: "Vokey SM9", distance: 110 }
+    ];
+
+    let myBag = [];
+
+    function renderBagList() {
+        myBag.sort((a, b) => b.distance - a.distance);
+        const listContainer = document.getElementById('bag-list');
+        listContainer.innerHTML = ""; 
+        
+        myBag.forEach((club, index) => {
+            listContainer.innerHTML += `
+                <div class="club-card">
+                    <div class="club-info">
+                        <h3>${club.name}</h3>
+                        <p>${club.brand || "Custom"} ${club.model || ""}</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="club-distance">${club.distance} yds</div>
+                        <span onclick="deleteClub(${index})" style="color: #D9534F; font-size: 16px; cursor: pointer; padding: 5px;">🗑️</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function addNewClub() {
+        const nameInput = document.getElementById('new-club-name');
+        const distInput = document.getElementById('new-club-dist');
+        const name = nameInput.value.trim();
+        const distance = parseInt(distInput.value, 10);
+        
+        if (!name || isNaN(distance)) {
+            alert("Please enter a valid club name and distance!");
+            return;
+        }
+        
+        myBag.push({ name: name, brand: "Custom", model: "", distance: distance });
+        saveToDeviceStorage();
+        renderBagList();
+        calculateShot(); 
+        
+        nameInput.value = "";
+        distInput.value = "";
+    }
+
+    function deleteClub(index) {
+        myBag.splice(index, 1);
+        saveToDeviceStorage();
+        renderBagList();
+        calculateShot();
+    }
+
+    // ------------------------------------------
+    // SUB-SECTION B: COURSE ROUTING DATABASE MAPS
+    // ------------------------------------------
+    const courseDatabase = {
+        calderfields: {
+            name: "Calderfields GC",
+            totalYards: 6305,
+            holes: [
+                { hole: 1, par: 4, yards: 395, lat: 52.58782, lon: -1.95485 },
+                { hole: 2, par: 5, yards: 490, lat: 52.58911, lon: -1.95620 },
+                { hole: 3, par: 4, yards: 375, lat: 52.59050, lon: -1.95710 },
+                { hole: 4, par: 4, yards: 410, lat: 52.59125, lon: -1.95430 },
+                { hole: 5, par: 4, yards: 350, lat: 52.59210, lon: -1.95115 },
+                { hole: 6, par: 4, yards: 380, lat: 52.59020, lon: -1.94950 },
+                { hole: 7, par: 4, yards: 365, lat: 52.58915, lon: -1.95120 },
+                { hole: 8, par: 4, yards: 420, lat: 52.58760, lon: -1.95295 },
+                { hole: 9, par: 3, yards: 160, lat: 52.58675, lon: -1.95410 }, 
+                { hole: 10, par: 4, yards: 385, lat: 52.58550, lon: -1.95540 },
+                { hole: 11, par: 4, yards: 400, lat: 52.58410, lon: -1.95280 },
+                { hole: 12, par: 3, yards: 145, lat: 52.58330, lon: -1.95015 },
+                { hole: 13, par: 4, yards: 390, lat: 52.58490, lon: -1.94820 },
+                { hole: 14, par: 5, yards: 510, lat: 52.58660, lon: -1.94710 },
+                { hole: 15, par: 4, yards: 365, lat: 52.58790, lon: -1.94935 },
+                { hole: 16, par: 5, yards: 505, lat: 52.58980, lon: -1.95215 },
+                { hole: 17, par: 3, yards: 155, lat: 52.58840, lon: -1.95350 },
+                { hole: 18, par: 4, yards: 370, lat: 52.58725, lon: -1.95510 }  
+            ]
+        },
+        lacala_america: {
+            name: "La Cala (America)",
+            totalYards: 5600,
+            holes: [
+                { hole: 1, par: 5, yards: 438, lat: 36.54125, lon: -4.72312 },
+                { hole: 2, par: 4, yards: 308, lat: 36.54280, lon: -4.72245 },
+                { hole: 3, par: 4, yards: 275, lat: 36.54415, lon: -4.72190 },
+                { hole: 4, par: 3, yards: 153, lat: 36.54560, lon: -4.72120 },
+                { hole: 5, par: 4, yards: 278, lat: 36.54695, lon: -4.72050 },
+                { hole: 6, par: 5, yards: 437, lat: 36.54820, lon: -4.72215 },
+                { hole: 7, par: 4, yards: 396, lat: 36.54710, lon: -4.72480 },
+                { hole: 8, par: 3, yards: 97,  lat: 36.54530, lon: -4.72590 },
+                { hole: 9, par: 5, yards: 458, lat: 36.54345, lon: -4.72450 },
+                { hole: 10, par: 4, yards: 337, lat: 36.54215, lon: -4.72610 },
+                { hole: 11, par: 3, yards: 209, lat: 36.54080, lon: -4.72750 },
+                { hole: 12, par: 4, yards: 346, lat: 36.53920, lon: -4.72680 },
+                { hole: 13, par: 4, yards: 341, lat: 36.53850, lon: -4.72425 },
+                { hole: 14, par: 3, yards: 126, lat: 36.53995, lon: -4.72290 },
+                { hole: 15, par: 5, yards: 479, lat: 36.54150, lon: -4.72085 },
+                { hole: 16, par: 3, yards: 105, lat: 36.54290, lon: -4.71940 },
+                { hole: 17, par: 4, yards: 326, lat: 36.54420, lon: -4.72010 },
+                { hole: 18, par: 5, yards: 491, lat: 36.54255, lon: -4.72185 }
+            ]
+        },
+        lacala_asia: {
+            name: "La Cala (Asia)",
+            totalYards: 5412,
+            holes: [
+                { hole: 1, par: 4, yards: 286, lat: 36.54395, lon: -4.72640 },
+                { hole: 2, par: 4, yards: 252, lat: 36.54510, lon: -4.72780 },
+                { hole: 3, par: 3, yards: 119, lat: 36.54630, lon: -4.72910 },
+                { hole: 4, par: 4, yards: 290, lat: 36.54780, lon: -4.72825 },
+                { hole: 5, par: 5, yards: 461, lat: 36.54925, lon: -4.72690 },
+                { hole: 6, par: 4, yards: 325, lat: 36.55060, lon: -4.72810 },
+                { hole: 7, par: 3, yards: 125, lat: 36.55195, lon: -4.72940 },
+                { hole: 8, par: 4, yards: 338, lat: 36.55010, lon: -4.73120 },
+                { hole: 9, par: 5, yards: 424, lat: 36.54845, lon: -4.72990 },
+                { hole: 10, par: 5, yards: 460, lat: 36.54720, lon: -4.73150 },
+                { hole: 11, par: 3, yards: 164, lat: 36.54580, lon: -4.73310 },
+                { hole: 12, par: 4, yards: 314, lat: 36.54415, lon: -4.73220 },
+                { hole: 13, par: 4, yards: 368, lat: 36.54290, lon: -4.73055 },
+                { hole: 14, par: 4, yards: 281, lat: 36.54430, lon: -4.72910 },
+                { hole: 15, par: 4, yards: 333, lat: 36.54595, lon: -4.72740 },
+                { hole: 16, par: 5, yards: 435, lat: 36.54740, lon: -4.72590 },
+                { hole: 17, par: 3, yards: 101, lat: 36.54565, lon: -4.72480 },
+                { hole: 18, par: 4, yards: 336, lat: 36.54435, lon: -4.72595 }
+            ]
+        },
+        lacala_europa: {
+            name: "La Cala (Europa)",
+            totalYards: 5705,
+            holes: [
+                { hole: 1, par: 4, yards: 289, lat: 36.53715, lon: -4.71890 },
+                { hole: 2, par: 4, yards: 334, lat: 36.53580, lon: -4.71740 },
+                { hole: 3, par: 3, yards: 152, lat: 36.53420, lon: -4.71610 },
+                { hole: 4, par: 4, yards: 362, lat: 36.53295, lon: -4.71765 },
+                { hole: 5, par: 4, yards: 311, lat: 36.53410, lon: -4.71920 },
+                { hole: 6, par: 4, yards: 338, lat: 36.53545, lon: -4.72080 },
+                { hole: 7, par: 4, yards: 356, lat: 36.53690, lon: -4.72210 },
+                { hole: 8, par: 5, yards: 475, lat: 36.53510, lon: -4.72395 },
+                { hole: 9, par: 3, yards: 155, lat: 36.53345, lon: -4.72240 },
+                { hole: 10, par: 3, yards: 113, lat: 36.53220, lon: -4.72390 },
+                { hole: 11, par: 5, yards: 504, lat: 36.53080, lon: -4.72550 },
+                { hole: 12, par: 4, yards: 316, lat: 36.52925, lon: -4.72420 },
+                { hole: 13, par: 4, yards: 343, lat: 36.52810, lon: -4.72195 },
+                { hole: 14, par: 3, yards: 217, lat: 36.52960, lon: -4.72050 },
+                { hole: 15, par: 5, yards: 481, lat: 36.53125, lon: -4.71880 },
+                { hole: 16, par: 3, yards: 142, lat: 36.53290, lon: -4.71740 },
+                { hole: 17, par: 5, yards: 472, lat: 36.53440, lon: -4.71615 },
+                { hole: 18, par: 4, yards: 345, lat: 36.53595, lon: -4.71790 }
+            ]
+        }
+    };
+
+    let currentCourseKey = "calderfields";
+    let courseHoles = courseDatabase[currentCourseKey].holes;
+    let userScores = new Array(18).fill(0);
+    let currentHoleIndex = 0;
+    let selectedStrokes = 0;
+    let hasEnteredGreenZone = false; 
+
+    function changeCourse() {
+        const selector = document.getElementById('course-selector');
+        currentCourseKey = selector.value;
+        courseHoles = courseDatabase[currentCourseKey].holes;
+        
+        userScores.fill(0);
+        currentHoleIndex = 0;
+        selectedStrokes = 0;
+        hasEnteredGreenZone = false;
+        
+        saveToDeviceStorage();
+        renderScorecardTable();
+        updateCaddyPageHeader();
+        calculateShot();
+        
+        let totalPar = courseHoles.reduce((sum, h) => sum + h.par, 0);
+        document.getElementById('total-par-target-cell').innerText = totalPar;
+    }
+
+            let roundHistory = [];
+
+    function loadSavedData() {
+        const savedScores = localStorage.getItem('earCaddy_userScores');
+        const savedHoleIndex = localStorage.getItem('earCaddy_currentHoleIndex');
+        const savedBag = localStorage.getItem('earCaddy_myBag');
+        const savedCourseKey = localStorage.getItem('earCaddy_currentCourseKey');
+        const savedHistory = localStorage.getItem('earCaddy_roundHistory');
+        
+        if (savedCourseKey && courseDatabase[savedCourseKey]) {
+            currentCourseKey = savedCourseKey;
+            courseHoles = courseDatabase[currentCourseKey].holes;
+        }
+        if (savedScores) userScores = JSON.parse(savedScores);
+        if (savedHoleIndex) currentHoleIndex = parseInt(savedHoleIndex, 10);
+        if (savedHistory) roundHistory = JSON.parse(savedHistory);
+        
+        if (savedBag && savedBag !== "[]") {
+            myBag = JSON.parse(savedBag);
+        } else {
+            myBag = [...defaultBag];
+        }
+        
+        const targetCell = document.getElementById('total-par-target-cell');
+        if (targetCell) {
+            let totalPar = courseHoles.reduce((sum, h) => sum + h.par, 0);
+            targetCell.innerText = totalPar;
+        }
+
+        renderScorecardTable();
+        updateCaddyPageHeader();
+        renderBagList();
+        renderHistoryLog(); // Paint our history log automatically
+        calculateShot();
+    }
+
+    function renderHistoryLog() {
+        const container = document.getElementById('history-log-container');
+        if (!container) return;
+        
+        if (roundHistory.length === 0) {
+            container.innerHTML = `<div id="no-rounds-fallback" style="text-align: center; color: #95a5a6; font-size: 13px; padding: 20px; background: white; border-radius: 12px; border: 1px dashed #DDD;">No historical rounds saved yet.</div>`;
+            return;
+        }
+        
+        container.innerHTML = "";
+        roundHistory.forEach((round, index) => {
+            container.innerHTML += `
+                <div style="background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #EAEAEA; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div>
+                        <div style="font-weight: bold; font-size: 14px; color: var(--text-dark);">${round.courseName}</div>
+                        <div style="font-size: 11px; color: #95a5a6; margin-top: 2px;">${round.date} • Par ${round.totalPar}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="text-align: right;">
+                            <div style="font-weight: 800; font-size: 18px; color: var(--forest-green);">${round.totalScore}</div>
+                            <div style="font-size: 11px; font-weight: bold; color: ${round.toPar.includes('+') ? '#D9534F' : 'var(--forest-green)'};">${round.toPar}</div>
+                        </div>
+                        <span onclick="deleteHistoryRound(${index})" style="cursor: pointer; font-size: 14px; padding: 5px;">🗑️</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function deleteHistoryRound(index) {
+        if (confirm("Remove this round from your history log permanently?")) {
+            roundHistory.splice(index, 1);
+            localStorage.setItem('earCaddy_roundHistory', JSON.stringify(roundHistory));
+            renderHistoryLog();
+        }
+    }
+
+    function resetRoundData() {
+        if (confirm("⚠️ WARNING: This will save your active scorecard to history and reset your current card back to Hole 1. Proceed?")) {
+            
+            // Calculate current card performance details to archive it
+            let totalScore = 0;
+            let totalParRunning = 0;
+            let activeHolesCount = 0;
+
+            courseHoles.forEach((holeObj, idx) => {
+                const score = userScores[idx];
+                if (score > 0) {
+                    totalScore += score;
+                    totalParRunning += holeObj.par;
+                    activeHolesCount++;
+                }
+            });
+
+            // Only save if you've actually logged at least one hole!
+            if (activeHolesCount > 0) {
+                let diff = totalScore - totalParRunning;
+                let diffText = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
+                const currentCourse = courseDatabase[currentCourseKey];
+                
+                const formattedDate = new Date().toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short'
+                });
+
+                roundHistory.unshift({
+                    courseName: currentCourse.name,
+                    date: formattedDate,
+                    totalPar: currentCourse.holes.reduce((sum, h) => sum + h.par, 0),
+                    totalScore: totalScore,
+                    toPar: diffText
+                });
+
+                localStorage.setItem('earCaddy_roundHistory', JSON.stringify(roundHistory));
+            }
+
+            // Wipe out current session variables cleanly
+            userScores.fill(0);
+            currentHoleIndex = 0;
+            selectedStrokes = 0;
+            hasEnteredGreenZone = false;
+            
+            localStorage.setItem('earCaddy_userScores', JSON.stringify(userScores));
+            localStorage.setItem('earCaddy_currentHoleIndex', currentHoleIndex.toString());
+            
+            renderScorecardTable();
+            updateCaddyPageHeader();
+            renderHistoryLog();
+            calculateShot();
+            switchPage('caddy');
+            alert("Active scorecard cleared and filed to your History Log!");
+        }
+    }
+
+</script>
+<script>
+    // ------------------------------------------
+    // SUB-SECTION D: UI RENDERING INTERFACES
+    // ------------------------------------------
+    const scorecardTableBody = document.getElementById('scorecard-rows');
+    
+        function renderScorecardTable() {
+        if (!scorecardTableBody) return;
+        
+        // Dynamic Update: Automatically match title and total yards from database
+        const currentCourse = courseDatabase[currentCourseKey];
+        const titleElement = document.getElementById('scorecard-course-title');
+        const yardsElement = document.getElementById('total-yards-cell');
+        
+        if (titleElement) titleElement.innerText = `Card • ${currentCourse.name}`;
+        if (yardsElement) yardsElement.innerText = `${currentCourse.totalYards} yds`;
+        
+        scorecardTableBody.innerHTML = "";
+        let totalScore = 0;
+        let totalParRunning = 0;
+        let activeHolesCount = 0;
+
+        courseHoles.forEach((holeObj, idx) => {
+            const score = userScores[idx];
+            let scoreText = "--";
+            let diffText = "--";
+            
+            if (score > 0) {
+                scoreText = score;
+                let diff = score - holeObj.par;
+                diffText = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
+                totalScore += score;
+                totalParRunning += holeObj.par;
+                activeHolesCount++;
+            }
+
+            scorecardTableBody.innerHTML += `
+                <tr>
+                    <td><strong>${holeObj.hole}</strong></td>
+                    <td>${holeObj.par}</td>
+                    <td style="font-weight:bold; color: ${score > 0 ? 'var(--forest-green)' : '#333'}">${scoreText}</td>
+                    <td>${diffText}</td>
+                </tr>`;
+        });
+
+        if (activeHolesCount > 0) {
+            document.getElementById('total-score-cell').innerText = totalScore;
+            let totalDiff = totalScore - totalParRunning;
+            document.getElementById('total-to-par-cell').innerText = totalDiff === 0 ? "E" : (totalDiff > 0 ? "+" + totalDiff : totalDiff);
+        } else {
+            document.getElementById('total-score-cell').innerText = "0";
+            document.getElementById('total-to-par-cell').innerText = "E";
+        }
+    }
+
+
+    function updateCaddyPageHeader() {
+        const activeHole = courseHoles[currentHoleIndex];
+        let headerText = `Hole ${activeHole.hole} • Par ${activeHole.par}`;
+        if (activeHole.yards) {
+            headerText += ` (${activeHole.yards} yds)`;
+        }
+        document.getElementById('caddy-hole-details').innerText = headerText;
+        document.getElementById('course-selector').value = currentCourseKey;
+    }
+
+        function switchPage(pageName) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('page-' + pageName).classList.add('active');
+        document.getElementById('nav-' + pageName).classList.add('active');
+
+        // Audio Primer: Fire a silent syllable on tab interaction to unlock iOS headphone access
+        if (typeof speechSynthesis !== 'undefined') {
+            const silentPrimer = new SpeechSynthesisUtterance(''); // Completely silent message
+            silentPrimer.volume = 0; // Absolute zero volume
+            if (selectedCaddyVoice) { silentPrimer.voice = selectedCaddyVoice; }
+            window.speechSynthesis.speak(silentPrimer);
+        }
+    }
+
+
+    // ------------------------------------------
+    // SUB-SECTION E: CLUB RECOMMENDATION LOGIC ENGINE
+    // ------------------------------------------
+    let isTeeShot = true; 
+    let currentLiveYards = 150; 
+
+    function updateLiveDistanceDisplay(yards) {
+        currentLiveYards = Math.round(yards); 
+        const isWindy = document.getElementById('wind-toggle').checked;
+        let playsLikeYards = currentLiveYards;
+        
+        if (isWindy) {
+            playsLikeYards = currentLiveYards + 15; 
+            document.getElementById('display-dist').innerHTML = `${currentLiveYards} <span style="font-size:20px; color:#D9534F;">(Plays ${playsLikeYards})</span>`;
+        } else {
+            document.getElementById('display-dist').innerHTML = `${currentLiveYards} <span style="font-size: 24px;">yds</span>`;
+        }
+
+        let recommendedClub = null;
+        let tacticalNote = "Full Swing"; 
+        
+        myBag.sort((a, b) => a.distance - b.distance);
+        
+        for (let i = 0; i < myBag.length; i++) {
+            if (myBag[i].distance >= playsLikeYards) {
+                if (myBag[i].name === "Driver" && !isTeeShot) {
+                    continue; 
+                }
+                recommendedClub = myBag[i];
+                
+                let yardageSurplus = recommendedClub.distance - playsLikeYards;
+                if (yardageSurplus > 15) {
+                    tacticalNote = "Smooth, easy swing. Choke down on the grip.";
+                } else if (yardageSurplus > 8) {
+                    tacticalNote = "Controlled three-quarter swing.";
+                }
+                break;
+            }
+        }
+        
+        if (!recommendedClub && myBag.length > 0) {
+            if (isTeeShot) {
+                recommendedClub = myBag.find(c => c.name === "Driver") || myBag[myBag.length - 1];
+                tacticalNote = "Let it rip off the tee!";
+            } else {
+                const fairwayClubs = myBag.filter(c => c.name !== "Driver");
+                recommendedClub = fairwayClubs[fairwayClubs.length - 1] || myBag[0];
+                tacticalNote = "Max deck shot. Give it everything.";
+            }
+        }
+
+        if (recommendedClub) {
+            document.getElementById('caddy-advice').innerText = `${recommendedClub.name} (${tacticalNote})`;
+        } else {
+            document.getElementById('caddy-advice').innerText = "Driver (Let it rip!)";
+        }
+    }
+
+    function calculateShot() {
+        updateLiveDistanceDisplay(currentLiveYards);
+    }
+
+    function simulateMovingWalkway(mockYards) {
+        isTeeShot = (document.getElementById('tee-fairway-toggle').value === 'tee');
+        simulateAutoAdvanceLogic(parseInt(mockYards, 10)); 
+        updateLiveDistanceDisplay(mockYards);
+    }
+
+    // ------------------------------------------
+    // SUB-SECTION F: VOICE GENERATION ENGINE
+    // ------------------------------------------
+    let selectedCaddyVoice = null;
+
+    function initVoices() {
+        if (typeof speechSynthesis === 'undefined') return;
+        const voices = window.speechSynthesis.getVoices();
+        selectedCaddyVoice = voices.find(voice => 
+            voice.lang === 'en-GB' && (voice.name.includes('Premium') || voice.name.includes('Enhanced') || voice.name.includes('Oliver') || voice.name.includes('Daniel'))
+        );
+        if (!selectedCaddyVoice) { selectedCaddyVoice = voices.find(voice => voice.lang === 'en-GB'); }
+        if (!selectedCaddyVoice) { selectedCaddyVoice = voices[0]; }
+    }
+
+    initVoices();
+    if (typeof speechSynthesis !== 'undefined' && window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = initVoices;
+    }
+
+    function speakRecommendation() {
+        const adviceText = document.getElementById('caddy-advice').innerText;
+        const isWindy = document.getElementById('wind-toggle').checked;
+        
+        let introCommentary = isWindy 
+            ? `Alright Russell. We've got ${currentLiveYards} yards to the flag, but playing ${currentLiveYards + 15} with this stiff headwind.` 
+            : `Alright Russell. We are sitting at exactly ${currentLiveYards} yards to the pin.`;
+        
+        let clubName = adviceText.split(' (')[0];
+        let swingInstruction = adviceText.split(' (')[1] ? adviceText.split(' (')[1].replace(')', '') : "Just commit to your tempo.";
+
+        let script = `${introCommentary} I like the ${clubName} here. The play is a ${swingInstruction}. Trust the line, commit to the strike, and get after it.`;
+        
+        const utterance = new SpeechSynthesisUtterance(script);
+        if (selectedCaddyVoice) { utterance.voice = selectedCaddyVoice; }
+        utterance.rate = 0.88; 
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // ------------------------------------------
+    // SUB-SECTION G: GEOLOCATION & HARDWARE GPS
+    // ------------------------------------------
+    
+    // GPS Smoothing Filter State Anchors
+    let lastValidYards = null;
+    let lastGpsTimestamp = null;
+    const MAX_WALKING_VELOCITY_YARDS_PER_SEC = 6; // Rejects impossible teleportation spikes
+
+let watchId = null;
+
+    function startLiveGPS() {
+        if (!navigator.geolocation) return;
+
+        const geoOptions = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0 
+        };
+
+        watchId = navigator.geolocation.watchPosition(gpsSuccess, gpsError, geoOptions);
+    }
+
+        function gpsSuccess(position) {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+        const currentTimestamp = position.timestamp || Date.now();
+        const activeHole = courseHoles[currentHoleIndex];
+        
+        if (activeHole.lat === 0 && activeHole.lon === 0) {
+            calculateShot();
+            return;
+        }
+
+        // 1. Calculate the true raw distance to the pin
+        const rawYards = calculateHaversineDistance(userLat, userLon, activeHole.lat, activeHole.lon);
+        let finalFilteredYards = rawYards;
+
+        // 2. Run the Velocity Filter Check if we have a previous data point
+        if (lastValidYards !== null && lastGpsTimestamp !== null) {
+            const timeElapsedSec = (currentTimestamp - lastGpsTimestamp) / 1000;
+            
+            if (timeElapsedSec > 0) {
+                const distanceJump = Math.abs(rawYards - lastValidYards);
+                const calculatedVelocity = distanceJump / timeElapsedSec;
+
+                // If spike is faster than human running/buggy speed, it's a satellite glitch!
+                if (calculatedVelocity > MAX_WALKING_VELOCITY_YARDS_PER_SEC && distanceJump > 12) {
+                    console.warn(`[GPS Filtered] Suppressed a telemetry jump of ${Math.round(distanceJump)} yards.`);
+                    // Smooth the transition instead of jumping wildly
+                    finalFilteredYards = lastValidYards + (Math.sign(rawYards - lastValidYards) * (MAX_WALKING_VELOCITY_YARDS_PER_SEC * timeElapsedSec));
+                }
+            }
+        }
+
+        // 3. Update memory anchors for the next satellite pulse
+        lastValidYards = finalFilteredYards;
+        lastGpsTimestamp = currentTimestamp;
+
+        // 4. Pass the stable numbers to the layout display
+        simulateAutoAdvanceLogic(finalFilteredYards);
+        updateLiveDistanceDisplay(finalFilteredYards);
+    }
+
+
+    function gpsError(error) {
+        console.warn(`GPS Warning (${error.code})`);
+        calculateShot();
+    }
+
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; 
+        const phi1 = lat1 * Math.PI / 180;
+        const phi2 = lat2 * Math.PI / 180;
+        const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+        const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                  Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+                  
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return (R * c) * 1.09361; 
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            if (navigator.geolocation && watchId !== null) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    gpsSuccess(pos);
+                }, gpsError, { enableHighAccuracy: true });
+            }
+        }
+    });
+
+    // ------------------------------------------
+    // SUB-SECTION H: CORE GAME STATE MODIFIERS
+    // ------------------------------------------
+    function simulateAutoAdvanceLogic(yards) {
+        const scoreCardBox = document.getElementById('score-card');
+        if (!scoreCardBox) return;
+        
+        if (yards <= 20 && !hasEnteredGreenZone) {
+            hasEnteredGreenZone = true;
+            isTeeShot = false;
+            if(document.getElementById('tee-fairway-toggle')) {
+                document.getElementById('tee-fairway-toggle').value = 'fairway';
+            }
+        }
+        
+        if (yards > 35 && hasEnteredGreenZone && !scoreCardBox.classList.contains('scorecard-active')) {
+            simulateLeavingGreen(); 
+        }
+    }
+
+    function simulateLeavingGreen() {
+        document.getElementById('score-card').classList.add('scorecard-active');
+        document.getElementById('score-status').innerText = `⚡ Ear Caddy Active: Log Hole ${currentHoleIndex + 1}`;
+        document.getElementById('score-status').style.color = "#1B4D3E";
+        document.getElementById('score-content').style.display = 'block';
+        document.getElementById('geo-trigger-btn').style.display = 'none';
+
+        let script = `Nice job finishing up on Hole ${currentHoleIndex + 1}, Russell. What did we card there?`;
+        const utterance = new SpeechSynthesisUtterance(script);
+        if (selectedCaddyVoice) { utterance.voice = selectedCaddyVoice; }
+        utterance.rate = 0.88;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function selectScore(element, value) {
+        element.parentElement.querySelectorAll('.score-box').forEach(b => b.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedStrokes = value;
+    }
+
+    // ==========================================
+    // MASTER DEVICE MEMORY RE-INJECTION SUITE
+    // ==========================================
+    function saveToDeviceStorage() {
+        localStorage.setItem('earCaddy_userScores', JSON.stringify(userScores));
+        localStorage.setItem('earCaddy_currentHoleIndex', currentHoleIndex.toString());
+        localStorage.setItem('earCaddy_myBag', JSON.stringify(myBag));
+        localStorage.setItem('earCaddy_currentCourseKey', currentCourseKey);
+        if (typeof roundHistory !== 'undefined') {
+            localStorage.setItem('earCaddy_roundHistory', JSON.stringify(roundHistory));
+        }
+    }
+
+
+    function saveHoleScore() {
+        if(selectedStrokes === 0) return;
+        
+        userScores[currentHoleIndex] = selectedStrokes;
+        currentHoleIndex++;
+        
+        if(currentHoleIndex >= 18) {
+            alert("Incredible round, Russell! You've completed 18 holes.");
+            currentHoleIndex = 0;
+        }
+        
+        isTeeShot = true; 
+        hasEnteredGreenZone = false;
+        
+        if(document.getElementById('tee-fairway-toggle')) {
+            document.getElementById('tee-fairway-toggle').value = 'tee';
+        }
+        
+        saveToDeviceStorage();
+        renderScorecardTable();
+        updateCaddyPageHeader();
+        
+        if(document.getElementById('sim-distance-slider')) {
+            document.getElementById('sim-distance-slider').value = 150;
+            currentLiveYards = 150;
+            document.getElementById('sim-slider-label').innerText = `Current Position: 150 yds`;
+        }
+        
+        calculateShot();
+        
+        selectedStrokes = 0;
+        document.querySelectorAll('.score-box').forEach(b => b.classList.remove('selected'));
+        document.getElementById('score-card').classList.remove('scorecard-active');
+        document.getElementById('score-status').innerText = "🔒 Scorecard Locked";
+        document.getElementById('score-status').style.color = "#999";
+        document.getElementById('score-content').style.display = 'none';
+        document.getElementById('geo-trigger-btn').style.display = 'block';
+        
+        switchPage('scores');
+    }
+
+    // ------------------------------------------
+    // APP INITIALIZATION CORE CALLS
+    // ------------------------------------------
+    loadSavedData();
+    // ------------------------------------------
+    // SUB-SECTION V: VOICE COMMAND INTERCEPTOR
+    // ------------------------------------------
+    let voiceRecognition = null;
+    let isVoiceCaddyActive = false;
+
+    function initVoiceCaddy() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            document.getElementById('voice-status-text').innerText = "Voice Not Supported";
+            document.getElementById('voice-toggle-btn').style.display = 'none';
+            return;
+        }
+
+        voiceRecognition = new SpeechRecognition();
+        voiceRecognition.continuous = true; // Keep listening in the background
+        voiceRecognition.interimResults = false; // Only process finished phrases
+        voiceRecognition.lang = 'en-US';
+
+        voiceRecognition.onstart = () => {
+            document.getElementById('voice-status-dot').style.background = '#2ECC71'; // Vibrant Green
+            document.getElementById('voice-status-text').innerText = "Listening for 'Ear Caddy'...";
+            document.getElementById('voice-toggle-btn').innerText = "Mute Mic";
+            document.getElementById('voice-toggle-btn').style.background = '#D9534F';
+            isVoiceCaddyActive = true;
+        };
+
+        voiceRecognition.onresult = (event) => {
+            const latestResultIndex = event.results.length - 1;
+            const spokenText = event.results[latestResultIndex][0].transcript.toLowerCase();
+            console.log(`[Voice Log]: "${spokenText}"`);
+
+            // Core Trigger Phrase Gate matching your style:
+            // Matches "hey ear caddy", "ok ear caddy", "ear caddy what's the play", "what are we looking at here"
+            if (spokenText.includes('ear caddy') || spokenText.includes('caddy')) {
+                if (spokenText.includes('play') || spokenText.includes('looking at') || spokenText.includes('distance') || spokenText.includes('shot')) {
+                    
+                    // Visual feedback accent spike
+                    const dot = document.getElementById('voice-status-dot');
+                    dot.style.transform = 'scale(2)';
+                    setTimeout(() => dot.style.transform = 'scale(1)', 500);
+                    
+                    // Instantly trigger Jamie to read the current shot yardage & club live
+                    if (typeof speakCaddyRecommendation === 'function') {
+                        speakCaddyRecommendation();
+                    } else {
+                        // Fallback click simulate if naming structures differ
+                        const listenBtn = document.querySelector('.btn[onclick*="speak"], button[onclick*="speak"]');
+                        if (listenBtn) listenBtn.click();
+                    }
+                }
+            }
+        };
+
+        voiceRecognition.onerror = (event) => {
+            console.error("[Voice Error]", event.error);
+            if (event.error === 'not-allowed') {
+                alert("Please grant microphone permissions to unlock hands-free Ear Caddy voice activation!");
+                stopVoiceCaddy();
+            }
+        };
+
+        // Self-Healing Restart: Web speech naturally drops out occasionally. This auto-wakes it back up instantly!
+        voiceRecognition.onend = () => {
+            if (isVoiceCaddyActive) {
+                voiceRecognition.start();
+            } else {
+                document.getElementById('voice-status-dot').style.background = '#999';
+                document.getElementById('voice-status-text').innerText = "Voice Control Off";
+                document.getElementById('voice-toggle-btn').innerText = "Enable Mic";
+                document.getElementById('voice-toggle-btn').style.background = 'var(--forest-green)';
+            }
+        };
+    }
+
+    function toggleVoiceCaddy() {
+        if (!voiceRecognition) initVoiceCaddy();
+        
+        if (!isVoiceCaddyActive) {
+            // Unlock audio engine permissions context first
+            if (typeof speechSynthesis !== 'undefined') {
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+            }
+            voiceRecognition.start();
+        } else {
+            stopVoiceCaddy();
+        }
+    }
+
+    function stopVoiceCaddy() {
+        isVoiceCaddyActive = false;
+        if (voiceRecognition) {
+            voiceRecognition.stop();
+        }
+    }
+
+    startLiveGPS();
+
+    // Splash Screen Dismissal Sequence
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const splash = document.getElementById('app-splash-screen');
+            if (splash) {
+                splash.style.opacity = '0';
+                splash.style.visibility = 'hidden';
+                // Remove from DOM entirely after transition completes so it doesn't block clicks
+                setTimeout(() => splash.remove(), 600);
+            }
+        }, 3500); // 3.5 seconds of pure premium branding showcase
+    });
+
+</script>
+
+</body>
+</html>
