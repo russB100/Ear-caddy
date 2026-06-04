@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ear Caddy - Tour Companion</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ear Caddy">
+    <link rel="apple-touch-icon" href="https://russb100.github.io/image_28.png">
+
+    <style>
+        :root {
+            --forest-green: #1B4D3E;
+            --mint-accent: #2ECC71;
+            --text-dark: #2C3E50;
+            --bg-light: #F8F9FA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.4;
+            overflow-x: hidden;
+        }
+
+        .page {
+            display: none;
+            padding: 20px;
+            padding-bottom: 100px;
+            min-height: 100vh;
+            width: 100vw;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--forest-green);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #7F8C8D;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #95A5A6;
+            margin-bottom: 5px;
+        }
+
+        .btn {
+            background: var(--forest-green);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(27,77,62,0.15);
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 75px;
+            background: #FFFFFF;
+            border-top: 1px solid #EAEAEA;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 9999;
+            box-sizing: border-box;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #95A5A6;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: var(--forest-green);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        /* SCORECARD SPECIFIC STRUCTURAL STYLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #EDF2F7;
+            padding: 10px 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        th {
+            background: #F8FAFC;
+            color: #64748B;
+            font-weight: 700;
+        }
+
+        .score-cell {
+            font-weight: 800;
+            background: #FAFAFA;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1B4D3E; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: opacity 0.6s ease, visibility 0.6s;">
+        <div style="font-size: 50px; margin-bottom: 10px;">🎧</div>
+        <h1 style="color: white; font-size: 32px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase;">Ear Caddy</h1>
+        <div style="color: #2ECC71; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;">Tour Edition Alpha</div>
+    </div>
+
+    <div id="page-caddy" class="page active">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-top: calc(env(safe-area-inset-top, 20px) + 10px);">
+            <div>
+                <h2>Hole <span id="hdr-hole-num">1</span></h2>
+                <div class="subtitle" id="hdr-course-title" style="margin-bottom:0;">Calderfields GC • Par 4</div>
+            </div>
+            <select id="course-selector-dropdown" onchange="handleCourseChange(this.value)" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #CCC; font-size: 12px; font-weight: bold; background: white; color: var(--text-dark); max-width: 160px; position: relative; z-index: 100000;">
+                <option value="calderfields">Calderfields GC</option>
+                <option value="lacala_campo_america">La Cala (America)</option>
+                <option value="lacala_campo_asia">La Cala (Asia)</option>
+                <option value="the_waft">The Waft Resort</option>
+            </select>
+        </div>
+
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; border: 1px dashed #CCC; background: #FAFAFA; padding: 12px 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div id="voice-status-dot" style="width: 10px; height: 10px; background: #999; border-radius: 50%; transition: transform 0.2s, background 0.2s;"></div>
+                <div id="voice-status-text" style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #7F8C8D; letter-spacing: 0.5px;">Voice Control Off</div>
+            </div>
+            <button id="voice-toggle-btn" onclick="toggleVoiceCaddy()" style="background: var(--forest-green); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer;">Enable Mic</button>
+        </div>
+
+        <div class="card" style="background: #FFFDF5; border: 1px solid #F9E79F; padding: 15px;">
+            <div class="label" style="color: #B7950B;">Dev Radar: Simulation Mode</div>
+            <input type="range" id="radar-slider" min="50" max="350" value="150" style="width: 100%; margin: 15px 0;" oninput="processManualSimulation(this.value)">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #7F8C8D;">
+                <span>50 yds</span>
+                <span id="radar-value-display" style="color: #B7950B;">Current Position: 150 yds</span>
+                <span>350 yds</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #FDF2E9;">
+                <span class="label" style="margin: 0;">Shot Location:</span>
+                <select id="lie-selector" onchange="handleLieChange(this.value)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #CCC; font-size: 12px; font-weight: bold; background: white;">
+                    <option value="fairway">Fairway / Rough</option>
+                    <option value="tee">Tee Box</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center; padding: 35px 20px;">
+            <div class="label">Distance to Pin</div>
+            <div style="font-size: 72px; font-weight: 900; color: var(--forest-green); line-height: 1; margin: 10px 0;">
+                <span id="main-yards-number">150</span><span style="font-size: 20px; font-weight: 700; color: #7F8C8D; margin-left: 5px;">yds</span>
+            </div>
+            <div style="background: #F8F9FA; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <span style="font-size: 13px; font-weight: 700; color: var(--text-dark);">Simulate 15mph Headwind</span>
+                <input type="checkbox" id="wind-toggle" onchange="toggleWindSimulation()" style="width: 18px; height: 18px; accent-color: var(--forest-green);">
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 5px solid var(--forest-green); padding-left: 15px;">
+            <div class="label" style="color: var(--forest-green);">Caddy Recommendation</div>
+            <h3 id="rec-club-box" style="font-size: 22px; font-weight: 800; color: var(--text-dark); margin: 5px 0;">7 Iron (150y Play)</h3>
+            <p id="rec-notes-box" style="font-size: 13px; color: #7F8C8D; font-weight: 500; margin-top: 5px;">Smooth swing, aim dead center flag. Wind is negligible.</p>
+        </div>
+
+        <button class="btn" onclick="triggerManualAudioBroadcast()">
+            <span>🔊</span> Squeeze Stem (Listen)
+        </button>
+    </div>
+
+    <div id="page-scorecard" class="page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-top: calc(env(safe-area-inset-top, 20px) + 10px);">
+            <h2>Scorecard</h2>
+            <span onclick="resetRoundData()" style="background: #FDF2F2; color: #D9534F; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 20px; border: 1px solid #FADBD8; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">Wipe Round</span>
+        </div>
+        <div class="subtitle" id="scorecard-course-subtitle">Calderfields GC</div>
+
+        <div class="card" style="padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table id="scorecard-table" style="font-size: 11px;">
+                <thead>
+                    <tr style="font-size: 9px;">
+                        <th>Hole</th>
+                        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th style="background:#EAEAEA; color:#333;">OUT</th>
+                        <th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th style="background:#EAEAEA; color:#333;">IN</th>
+                        <th style="background:var(--forest-green); color:white;">TOT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="row-par">
+                        <td style="font-weight:700; color:#7F8C8D; text-transform:uppercase; font-size:9px;">Par</td>
+                        <td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td>4</td><td>3</td><td>4</td><td>4</td><td id="out-par-cell" style="background:#F8F9FA; font-weight:700;">35</td>
+                        <td>4</td><td>4</td><td>3</td><td>4</td><td>5</td><td>4</td><td>3</td><td>4</td><td>4</td><td id="in-par-cell" style="background:#F8F9FA; font-weight:700;">35</td>
+                        <td id="total-par-target-cell" style="font-weight:700; background:#EAEAEA;">70</td>
+                    </tr>
+                    <tr id="row-score">
+                        <td style="font-weight:700; color:var(--forest-green); text-transform:uppercase; font-size:9px;">Score</td>
+                        <td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td id="out-score-cell" style="background:#F4F9F4; font-weight:700;">-</td>
+                        <td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td class="score-cell">-</td><td id="in-score-cell" style="background:#F4F9F4; font-weight:700;">-</td>
+                        <td id="total-score-cell" style="font-weight:800; background:#E8F5E8; color:var(--forest-green);">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn" style="background:#7F8C8D;" onclick="adjustHoleScore(-1)">➖ Stroke</button>
+            <button class="btn" onclick="adjustHoleScore(1)">➕ Stroke</button>
+        </div>
+    </div>
+
+    <div id="page-bag" class="page" style="padding-top: calc(env(safe-area-inset-top, 20px) + 10px);">
+        <h2 style="margin-top: 0;">Virtual Bag</h2>
+        <div class="subtitle">Calibrate Club Yardages</div>
+
+        <div class="card" style="background: #FAFCFA; border: 1px solid #E8F5E9; padding: 15px; margin-bottom: 15px;">
+            <label class="label" style="color: var(--forest-green); display: block; margin-bottom: 8px;">Alpha Player Profiler</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <input type="text" id="player-name-input" value="Russell" placeholder="Enter player name..." style="flex: 2; padding: 10px 12px; border-radius: 10px; border: 1px solid #CCC; font-size: 14px; font-weight: 600; color: var(--text-dark);" onchange="updatePlayerName(this.value)">
+            </div>
+
+            <label class="label" style="color: #7F8C8D; display: block; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Premium Cloud Voice Key (Saved Locally)</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="password" id="voice-api-key-input" placeholder="Paste elevenlabs key here..." style="flex: 2; padding: 10px 12px; border-radius: 10px; border: 1px solid #CCC; font-size: 13px; font-family: monospace; color: var(--text-dark);" onchange="updateVoiceKey(this.value)">
+                <button onclick="testNameGreeting()" style="flex: 1; background: var(--forest-green); color: white; border: none; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; cursor: pointer;">Test AI Voice</button>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 10px;">
+            <div style="padding: 12px 15px; background: #F8F9FA; border-bottom: 1px solid #EAEAEA; display: flex; font-size: 10px; font-weight: 800; color: #95A5A6; text-transform: uppercase; letter-spacing: 0.5px;">
+                <div style="flex: 2; text-align: left;">Club Name</div>
+                <div style="flex: 1; text-align: center;">Carry Avg</div>
+            </div>
+            <div id="bag-clubs-container">
+                </div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active" onclick="switchActiveTab('caddy', this)">
+            <span class="nav-icon">⛳</span>
+            <span>Caddy</span>
+        </div>
+        <div class="nav-item" onclick="switchActiveTab('scorecard', this)">
+            <span class="nav-icon">📊</span>
+            <span>Scores</span>
+        </div>
+        <div class="nav-item" onclick="switchActiveTab('bag', this)">
+            <span class="nav-icon">💼</span>
+            <span>My Bag</span>
+        </div>
+    </nav>
+
+    <script>
+        // ==========================================
+        // SUB-SECTION I: GLOBAL COURSE DATABASES
+        // ==========================================
+        const courseDatabase = {
+            calderfields: {
+                name: "Calderfields GC",
+                holes: [
+                    { num: 1, par: 4, lat: 52.60124, lon: -1.95432, notes: "Aim left edge of fairway bunker. Avoid right trees." },
+                    { num: 2, par: 4, lat: 52.60251, lon: -1.95541, notes: "Uphill approach, takes one extra club." },
+                    { num: 3, par: 3, lat: 52.60312, lon: -1.95211, notes: "Guard against the left-side green bunker." },
+                    { num: 4, par: 4, lat: 52.60421, lon: -1.95105, notes: "Dogleg right. Keep tee shot straight." },
+                    { num: 5, par: 5, lat: 52.60589, lon: -1.94982, notes: "Reach-in-two option. Watch water hazard back-right." },
+                    { num: 6, par: 4, lat: 52.60611, lon: -1.95321, notes: "Slight crosswind likely here. Check flags." },
+                    { num: 7, par: 3, lat: 52.60488, lon: -1.95562, notes: "Deep drop-off behind green. Do not go long." },
+                    { num: 8, par: 4, lat: 52.60399, lon: -1.95714, notes: "Narrow landing corridor. Layup option viable." },
+                    { num: 9, par: 4, lat: 52.60215, lon: -1.95601, notes: "Club down if headwind dies out. Front apron drops." }
+                ]
+            },
+            lacala_campo_america: {
+                name: "La Cala (America)",
+                holes: [
+                    { num: 1, par: 5, lat: 36.54122, lon: -4.72154, notes: "Elevated tee. Magnificent views, stay left of center spine." },
+                    { num: 2, par: 4, lat: 36.54285, lon: -4.72311, notes: "Sharp downhill approach. Subtract 10 yards from raw calculation." },
+                    { num: 3, par: 3, lat: 36.54391, lon: -4.72005, notes: "Carry over ravine required. Trust your yardage selection." },
+                    { num: 4, par: 4, lat: 36.54512, lon: -4.71892, notes: "Blind tee shot. Take alignment line off marker post." },
+                    { num: 5, par: 5, lat: 36.54688, lon: -4.71714, notes: "Three-shot hole. Steep bunkering patterns protect front green." },
+                    { num: 6, par: 4, lat: 36.54801, lon: -4.71988, notes: "Slight dogleg left. High draw is heavily rewarded." },
+                    { num: 7, par: 3, lat: 36.54714, lon: -4.72251, notes: "Tricky wind channels on this shelf. Protect left pin." },
+                    { num: 8, par: 4, lat: 36.54602, lon: -4.72411, notes: "Uphill fairway. Ball will run less upon landing." },
+                    { num: 9, par: 4, lat: 36.54399, lon: -4.72288, notes: "Water hazard guards front edge. Check wind values carefully." }
+                ]
+            },
+            lacala_campo_asia: {
+                name: "La Cala (Asia)",
+                holes: [
+                    { num: 1, par: 4, lat: 36.54011, lon: -4.72511, notes: "Demanding opening tee shot. Guard against the lateral hazard on the right side." },
+                    { num: 2, par: 3, lat: 36.54155, lon: -4.72622, notes: "Short but technical par 3. Mind the dramatic drop-off if you fall short." },
+                    { num: 3, par: 5, lat: 36.54299, lon: -4.72401, notes: "Long, winding par 5. Keep your second shot layout carefully down the left side." },
+                    { num: 4, par: 4, lat: 36.54412, lon: -4.72315, notes: "Tight fairway corridor. Precision with a long hybrid or 3-wood is preferred here." },
+                    { num: 5, par: 4, lat: 36.54555, lon: -4.72199, notes: "Uphill approach slope. Add 8 yards to your club selection choice." },
+                    { num: 6, par: 4, lat: 36.54611, lon: -4.72488, notes: "Blind green surface. Trust the caddy line straight over the center target marker." },
+                    { num: 7, par: 5, lat: 36.54502, lon: -4.72711, notes: "Downhill risk-reward routing. Protect against the deep green-side bunkers." },
+                    { num: 8, par: 3, lat: 36.54388, lon: -4.72902, notes: "Exposed putting surface. Check the wind direction before setting your stance." },
+                    { num: 9, par: 4, lat: 36.54199, lon: -4.72788, notes: "Heavy approach layout. Keeping it on the front apron is a fantastic miss option." }
+                ]
+            },
+            the_waft: {
+                name: "The Waft Golf Resort",
+                holes: [
+                    { num: 1, par: 4, lat: 0, lon: 0, notes: "Virtual Test Arena. Beautiful open driving line layout down the center channel." },
+                    { num: 2, par: 4, lat: 0, lon: 0, notes: "Virtual Test Arena. Deep approach bunker guards a multi-tiered putting tier." },
+                    { num: 3, par: 3, lat: 0, lon: 0, notes: "Virtual Test Arena. Pure chip shot execution. Protect against thin right winds." },
+                    { num: 4, par: 5, lat: 0, lon: 0, notes: "Virtual Test Arena. Clear runway corridor. Let the big dog eat off the tee box." },
+                    { num: 5, par: 4, lat: 0, lon: 0, notes: "Virtual Test Arena. Sharp angle dogleg structure. Laying up keeps scores safe." },
+                    { num: 6, par: 4, lat: 0, lon: 0, notes: "Virtual Test Arena. Sloping contours. Play for a safe target area on fairway center." },
+                    { num: 7, par: 3, lat: 0, lon: 0, notes: "Virtual Test Arena. Elevated green shelf. Club up if you suspect low gusts." },
+                    { num: 8, par: 5, lat: 0, lon: 0, notes: "Virtual Test Arena. Epic finish challenge block. Avoid tactical water traps." },
+                    { num: 9, par: 4, lat: 0, lon: 0,
+        // ==========================================
+        // SUB-SECTION III: TABS & INTERFACE ROUTING
+        // ==========================================
+        function switchActiveTab(targetTabId, elementsPointer) {
+            // Hide all functional sub-panels cleanly
+            const panels = document.querySelectorAll('.page');
+            panels.forEach(p => p.classList.remove('active'));
+
+            // Remove visual highlighters from footer navigation links
+            const links = document.querySelectorAll('.nav-item');
+            links.forEach(l => l.classList.remove('active'));
+
+            // Wake up target interface layout selection
+            const targetDomElement = document.getElementById('page-' + targetTabId);
+            if (targetDomElement) targetDomElement.classList.add('active');
+            if (elementsPointer) elementsPointer.classList.add('active');
+        }
+
+        // ==========================================
+        // SUB-SECTION IV: HARDWARE ENGINE MEMORY VAULT
+        // ==========================================
+        function saveToDeviceStorage() {
+            try {
+                localStorage.setItem('earCaddy_courseKey', currentCourseKey);
+                localStorage.setItem('earCaddy_holeIdx', currentHoleIndex.toString());
+                localStorage.setItem('earCaddy_scores', JSON.stringify(userScores));
+                localStorage.setItem('earCaddy_bag', JSON.stringify(myBag));
+            } catch (err) {
+                console.error("[Local Storage Write Error Exception]:", err);
+            }
+        }
+
+        function loadSavedData() {
+            // Load names and secure cloud audio keys
+            const cachedName = localStorage.getItem('earCaddy_playerName');
+            if (cachedName) {
+                currentPlayerName = cachedName;
+                const inputField = document.getElementById('player-name-input');
+                if (inputField) inputField.value = currentPlayerName;
+            }
+
+            const cachedKey = localStorage.getItem('earCaddy_voiceKey');
+            if (cachedKey) {
+                elevenLabsApiKey = cachedKey;
+                const keyInput = document.getElementById('voice-api-key-input');
+                if (keyInput) keyInput.value = elevenLabsApiKey;
+            }
+
+            const storedCourse = localStorage.getItem('earCaddy_courseKey');
+            if (storedCourse && courseDatabase[storedCourse]) {
+                currentCourseKey = storedCourse;
+            }
+            
+            // Build out responsive 18-hole blueprint configuration matrix arrays
+            let activeDbCourse = courseDatabase[currentCourseKey];
+            if (activeDbCourse.holes.length === 9) {
+                let baseHoles = [...activeDbCourse.holes];
+                let extendedHoles = baseHoles.map(h => ({
+                    num: h.num + 9,
+                    par: h.par,
+                    lat: h.lat !== 0 ? h.lat + 0.001 : 0,
+                    lon: h.lon !== 0 ? h.lon + 0.001 : 0,
+                    notes: h.notes
+                }));
+                courseHoles = baseHoles.concat(extendedHoles);
+            } else {
+                courseHoles = activeDbCourse.holes;
+            }
+
+            const storedHoleIdx = localStorage.getItem('earCaddy_holeIdx');
+            if (storedHoleIdx) currentHoleIndex = parseInt(storedHoleIdx, 10);
+
+            const storedScores = localStorage.getItem('earCaddy_scores');
+            if (storedScores) {
+                try {
+                    userScores = JSON.parse(storedScores);
+                    if (userScores.length !== courseHoles.length) {
+                        userScores = new Array(courseHoles.length).fill(0);
+                    }
+                } catch(e) {
+                    userScores = new Array(courseHoles.length).fill(0);
+                }
+            } else {
+                userScores = new Array(courseHoles.length).fill(0);
+            }
+
+            const storedBag = localStorage.getItem('earCaddy_bag');
+            if (storedBag) {
+                try { myBag = JSON.parse(storedBag); } catch(e){}
+            }
+
+            // Sync visual header titles across the UI layout deck
+            const activeHoleObject = courseHoles[currentHoleIndex];
+            if (activeHoleObject) {
+                document.getElementById('hdr-hole-num').innerText = activeHoleObject.num;
+                document.getElementById('hdr-course-title').innerText = `${activeDbCourse.name} • Par ${activeHoleObject.par}`;
+                if (document.getElementById('scorecard-course-subtitle')) {
+                    document.getElementById('scorecard-course-subtitle').innerText = activeDbCourse.name;
+                }
+            }
+
+            // Sync structural parameters down to individual layout component cards
+            const drop = document.getElementById('course-selector-dropdown');
+            if (drop) drop.value = currentCourseKey;
+
+            // Recalculate dynamic par structures for OUT, IN, and TOT cells
+            const totalPar = courseHoles.reduce((sum, h) => sum + h.par, 0);
+            const outPar = courseHoles.slice(0, 9).reduce((sum, h) => sum + h.par, 0);
+            const inPar = courseHoles.slice(9, 18).reduce((sum, h) => sum + h.par, 0);
+            
+            if (document.getElementById('total-par-target-cell')) document.getElementById('total-par-target-cell').innerText = totalPar;
+            if (document.getElementById('out-par-cell')) document.getElementById('out-par-cell').innerText = outPar;
+            if (document.getElementById('in-par-cell')) document.getElementById('in-par-cell').innerText = inPar;
+
+            renderScorecardTable();
+            renderVirtualBagList();
+            recalculateCaddyRecommendation();
+        }
+
+        // ==========================================
+        // SUB-SECTION V: VIRTUAL BAG RENDER LAYOUTS
+        // ==========================================
+        function renderVirtualBagList() {
+            const container = document.getElementById('bag-clubs-container');
+            if (!container) return;
+            container.innerHTML = "";
+
+            myBag.forEach((club, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = "display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #F1F2F6;";
+                item.innerHTML = `
+                    <div style="flex: 2; font-weight: 700; font-size: 14px; color: var(--text-dark);">${club.name}</div>
+                    <div style="flex: 1; text-align: center;">
+                        <input type="number" value="${club.carry}" style="width: 65px; padding: 6px; text-align: center; font-weight: 800; font-size: 13px; border: 1px solid #DCDDE1; border-radius: 8px;" onchange="updateClubDistance(${index}, this.value)">
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateClubDistance(idx, newValue) {
+            let parsedVal = parseInt(newValue, 10);
+            if (isNaN(parsedVal) || parsedVal < 0) parsedVal = 0;
+            myBag[idx].carry = parsedVal;
+            saveToDeviceStorage();
+            recalculateCaddyRecommendation();
+        }
+        // ==========================================
+        // SUB-SECTION VI: SCORECARD CORE OPERATIONS
+        // ==========================================
+        function adjustHoleScore(delta) {
+            let currentScore = userScores[currentHoleIndex];
+            currentScore += delta;
+            if (currentScore < 0) currentScore = 0;
+            userScores[currentHoleIndex] = currentScore;
+            
+            saveToDeviceStorage();
+            renderScorecardTable();
+        }
+
+        function resetRoundData() {
+            if (confirm("Are you sure you want to clear your current scorecard records?")) {
+                userScores = new Array(courseHoles.length).fill(0);
+                currentHoleIndex = 0;
+                saveToDeviceStorage();
+                loadSavedData();
+            }
+        }
+
+        // ==========================================
+        // SUB-SECTION VII: CADDY MATRIX CALCULATORS
+        // ==========================================
+        function processManualSimulation(value) {
+            manualRawSimulationYards = parseInt(value, 10);
+            const display = document.getElementById('radar-value-display');
+            if (display) display.innerText = `Current Position: ${manualRawSimulationYards} yds`;
+            
+            const mainYards = document.getElementById('main-yards-number');
+            if (mainYards) mainYards.innerText = manualRawSimulationYards;
+            
+            recalculateCaddyRecommendation();
+        }
+
+        function handleLieChange(value) {
+            currentLieSetting = value;
+            recalculateCaddyRecommendation();
+        }
+
+        function toggleWindSimulation() {
+            isWindSimulationActive = document.getElementById('wind-toggle').checked;
+            recalculateCaddyRecommendation();
+        }
+
+        function recalculateCaddyRecommendation() {
+            let adjustedYards = manualRawSimulationYards;
+
+            // Apply wind matrix parameters (+15 yards for headwind)
+            if (isWindSimulationActive) {
+                adjustedYards += 15;
+            }
+
+            // Apply lie surface parameters (+10 yards penalty for rough layout execution)
+            if (currentLieSetting === "rough") {
+                adjustedYards += 10;
+            }
+
+            // Dynamic algorithmic club matching scan loop
+            let bestClubMatch = myBag[myBag.length - 1]; // Baseline fallback default
+            for (let i = myBag.length - 1; i >= 0; i--) {
+                if (myBag[i].carry >= adjustedYards) {
+                    bestClubMatch = myBag[i];
+                    break;
+                }
+                if (i === 0) {
+                    bestClubMatch = myBag[0]; // Cap out at longest weapon
+                }
+            }
+
+            // Sync findings down to UI viewport cards
+            const recClub = document.getElementById('rec-club-box');
+            const recNotes = document.getElementById('rec-notes-box');
+            const activeHole = courseHoles[currentHoleIndex];
+
+            if (recClub && recNotes && activeHole) {
+                recClub.innerText = `${bestClubMatch.name} (${manualRawSimulationYards}y Play)`;
+                
+                let windString = isWindSimulationActive ? " Playing into a stiff 15mph breeze." : "";
+                let surfaceString = currentLieSetting === "rough" ? " Ball is sitting in thick rough." : "";
+                
+                recNotes.innerText = `Hole ${activeHole.num} Caddy Note: ${activeHole.notes}${windString}${surfaceString} Trust a smooth release tempo.`;
+            }
+        }
+
+        // ==========================================
+        // SUB-SECTION VIII: VOICE RECOGNITION DECK
+        // ==========================================
+        let voiceRecognition = null;
+        let isMicrophoneActive = false;
+
+        if ('webkitSpeechRecognition' in window || 'speechRecognition' in window) {
+            const SpeechEngineClass = window.speechRecognition || window.webkitSpeechRecognition;
+            voiceRecognition = new SpeechEngineClass();
+            voiceRecognition.continuous = true;
+            voiceRecognition.interimResults = false;
+            voiceRecognition.lang = 'en-GB';
+
+            voiceRecognition.onstart = function() {
+                isMicrophoneActive = true;
+                updateVoiceControlUI(true, "Caddy Listening...");
+            };
+
+            voiceRecognition.onend = function() {
+                if (isMicrophoneActive) {
+                    // Force infinite recovery loop execution to prevent pocket dropouts
+                    try { voiceRecognition.start(); } catch(e){}
+                } else {
+                    updateVoiceControlUI(false, "Voice Control Off");
+                }
+            };
+
+            voiceRecognition.onresult = function(event) {
+                let spokenText = "";
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        spokenText += event.results[i][0].transcript;
+                    }
+                }
+                
+                spokenText = spokenText.toLowerCase().trim();
+                if (spokenText.length === 0) return;
+                
+                console.log("[Voice Core Input]: " + spokenText);
+
+                // HIGHLY SENSITIVE MULTI-KEYWORD MATRIX INTERCEPT
+                const hasCaddyCall = spokenText.includes('caddy') || spokenText.includes('ear caddy') || spokenText.includes('audi') || spokenText.includes('carry');
+                const hasActionCall = spokenText.includes('play') || spokenText.includes('distance') || spokenText.includes('yards') || spokenText.includes('yardage') || spokenText.includes('club') || spokenText.includes('looking at') || spokenText.includes('shot') || spokenText.includes('mate');
+                const absoluteShortcut = spokenText.startsWith("what's the play") || spokenText.startsWith("whats the play") || spokenText.startsWith("club choice");
+
+                if ((hasCaddyCall && hasActionCall) || absoluteShortcut) {
+                    const dot = document.getElementById('voice-status-dot');
+                    if (dot) {
+                        dot.style.transform = 'scale(1.8)';
+                        dot.style.background = '#3498DB'; // Electric Blue flash confirmation
+                        setTimeout(function() { 
+                            dot.style.transform = 'scale(1)'; 
+                            dot.style.background = '#2ECC71';
+                        }, 500);
+                    }
+                    
+                    triggerManualAudioBroadcast();
+                }
+            };
+
+            voiceRecognition.onerror = function(event) {
+                console.error("[Voice recognition exception metadata]:", event.error);
+            };
+        }
+
+        function toggleVoiceCaddy() {
+            if (!voiceRecognition) {
+                alert("Speech parameters are completely locked down or unsupported on this specific mobile environment.");
+                return;
+            }
+
+            if (!isMicrophoneActive) {
+                // Wake up audio stream matrix contexts
+                isMicrophoneActive = true;
+                try { voiceRecognition.start(); } catch(e){}
+            } else {
+                stopVoiceCaddy();
+            }
+        }
+
+        function stopVoiceCaddy() {
+            isMicrophoneActive = false;
+            if (voiceRecognition) {
+                try { voiceRecognition.stop(); } catch(e){}
+            }
+            updateVoiceControlUI(false, "Voice Control Off");
+        }
+
+        function updateVoiceControlUI(isActive, displayString) {
+            const dot = document.getElementById('voice-status-dot');
+            const txt = document.getElementById('voice-status-text');
+            const btn = document.getElementById('voice-toggle-btn');
+
+            if (dot) dot.style.background = isActive ? "#2ECC71" : "#999";
+            if (txt) txt.innerText = displayString;
+            if (btn) {
+                btn.innerText = isActive ? "Mute Mic" : "Enable Mic";
+                btn.style.background = isActive ? "#E74C3C" : "var(--forest-green)";
+            }
+        }
+        // ==========================================
+        // SUB-SECTION IX: PREMIUM ELEVENLABS AUDIO ENGINE
+        // ==========================================
+        function triggerManualAudioBroadcast() {
+            const clubText = document.getElementById('rec-club-box').innerText;
+            const notesText = document.getElementById('rec-notes-box').innerText;
+            
+            // Craft a highly personalized script using your active name state
+            const targetScript = `Right then ${currentPlayerName}, you're looking at ${clubText}. ${notesText}`;
+            
+            // Check if a premium cloud key is active in vault memory
+            if (elevenLabsApiKey && elevenLabsApiKey.trim() !== "") {
+                streamPremiumElevenLabsAudio(targetScript);
+            } else {
+                // Smooth fallback loop to basic browser voice if no key is entered yet
+                executeLegacySpeechFallback(targetScript);
+            }
+        }
+
+        function streamPremiumElevenLabsAudio(phraseText) {
+            console.log("[Ear Caddy Audio]: Initiating premium cloud voice pipeline request...");
+            
+            // Target Voice ID: "Rachel" (Premium, highly articulative English conversational tone)
+            // You can easily swap this out for other custom voice IDs in your dashboard later!
+            const targetVoiceId = "21m00Tcm4TlvDq8ikWAM"; 
+            const apiEndpointUrl = `https://api.elevenlabs.io/v1/text-to-speech/${targetVoiceId}`;
+
+            // Clean, highly optimized audio generation parameters payload configuration
+            const payloadBody = {
+                text: phraseText,
+                model_id: "eleven_monolingual_v1",
+                voice_settings: {
+                    stability: 0.75,
+                    similarity_boost: 0.85
+                }
+            };
+
+            fetch(apiEndpointUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "xi-api-key": elevenLabsApiKey
+                },
+                body: JSON.stringify(payloadBody)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Cloud connection status anomaly: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(audioBlob => {
+                console.log("[Ear Caddy Audio]: Premium audio stream payload verified. Compiling object URL...");
+                const audioBlobUrl = URL.createObjectURL(audioBlob);
+                const audioPlayerElement = new Audio(audioBlobUrl);
+                
+                // Route stream directly into system audio matrix hardware cells (AirPods)
+                audioPlayerElement.play()
+                    .then(() => console.log("[Ear Caddy Audio]: Playing hyper-realistic caddy feedback pipeline."))
+                    .catch(err => console.error("[Audio Track Execution Blocked]:", err));
+            })
+            .catch(err => {
+                console.error("[ElevenLabs Gateway Communication Exception]:", err);
+                // Fail-safe insurance protocol: instantly drop back to fallback voice so caddy doesn't go mute
+                executeLegacySpeechFallback(phraseText);
+            });
+        }
+
+        function executeLegacySpeechFallback(phraseText) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); 
+            
+            const utterance = new SpeechSynthesisUtterance(phraseText);
+            const systemVoices = window.speechSynthesis.getVoices();
+            const preferredFallback = systemVoices.find(v => v.lang === 'en-GB' || v.lang.startsWith('en'));
+            
+            if (preferredFallback) utterance.voice = preferredFallback;
+            utterance.rate = 0.92;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function testNameGreeting() {
+            const targetScript = `Hello ${currentPlayerName}. I am your virtual tour caddy. Premium cloud text-to-speech pipeline running flawlessly.`;
+            if (elevenLabsApiKey && elevenLabsApiKey.trim() !== "") {
+                streamPremiumElevenLabsAudio(targetScript);
+            } else {
+                executeLegacySpeechFallback(targetScript);
+            }
+        }
+
+        // ==========================================
+        // SUB-SECTION X: HOME-SAFE BACKGROUND GPS
+        // ==========================================
+        function startLiveGPS() {
+            if (!navigator.geolocation) return;
+            
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const activeHole = courseHoles[currentHoleIndex];
+                    if (!activeHole || (activeHole.lat === 0 && activeHole.lon === 0)) return;
+
+                    // Haversine high-precision radius conversion math
+                    const R = 6371e3; 
+                    const lat1 = position.coords.latitude * Math.PI / 180;
+                    const lat2 = activeHole.lat * Math.PI / 180;
+                    const deltaLat = (activeHole.lat - position.coords.latitude) * Math.PI / 180;
+                    const deltaLon = (activeHole.lon - position.coords.longitude) * Math.PI / 180;
+
+                    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+                              Math.cos(lat1) * Math.cos(lat2) *
+                              Math.sin(deltaLon/2) * Math.sin(deltaLon/2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    const meters = R * c;
+                    const rawYards = meters * 1.09361;
+                    
+                    // HOME TESTING GATE: Only pull real coordinates if you are under 800 yards from the course
+                    if (rawYards < 800) {
+                        manualRawSimulationYards = Math.round(rawYards);
+                        const slider = document.getElementById('radar-slider');
+                        if (slider) slider.value = manualRawSimulationYards;
+                        processManualSimulation(manualRawSimulationYards);
+                    }
+                },
+                (err) => console.warn("[GPS background search bypass]:", err.message),
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 2000 }
+            );
+        }
+
+        // ==========================================
+        // SUB-SECTION XI: MAIN MASTER APPLICATION INITIALIZER
+        // ==========================================
+        function initializeEarCaddyApp() {
+            console.log("[Ear Caddy Master]: Booting application structures...");
+            try {
+                loadSavedData();
+                startLiveGPS();
+            } catch(e) {
+                console.error("[Bootloader sequence handled exception]:", e);
+            }
+
+            // Smoothly remove splash overlay panel after 3.5 seconds
+            setTimeout(() => {
+                const splash = document.getElementById('app-splash-screen');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    splash.style.visibility = 'hidden';
+                    console.log("[Ear Caddy]: Application interface ready.");
+                    setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
+                }
+            }, 3500);
+        }
+
+        // Trigger master runtime execution parameters
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeEarCaddyApp);
+        } else {
+            initializeEarCaddyApp();
+        }
+    </script>
+</body>
+</html>
